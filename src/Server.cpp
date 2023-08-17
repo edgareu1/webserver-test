@@ -52,30 +52,29 @@ HttpResponse    Server::handleRequest(const HttpRequest& req)
     // Check if a valid route has been found
     if (!route) {
         // TODO: return 404 error page
-        res.status(404);
+        res.set_status(404);
         return res;
     }
 
     path = get_path(req, route);
 
-
     // Check if file exists
     if (!is_directory(path) && ::access(path.c_str(), F_OK) < 0)
         return response_error(req, res, _cfg, route, 404);
 
-        // Check if we have access to file
+    // Check if we have access to file
     else if (::access(path.c_str(), O_RDONLY) < 0)
         return response_error(req, res, _cfg, route, 403);
 
-        // Check if requested method is available
+    // Check if requested method is available
     else if (!route->accepted_methods.empty() && !is_accepted_method(route, req.method()))
         return response_error(req, res, _cfg, route, 405);
 
-        // Handle GET method
+    // Handle GET method
     else if (req.method() == "GET")
         return response_get(req, path, res, _cfg, route);
 
-        // Handle HEAD method
+    // Handle HEAD method
     else if (req.method() == "HEAD")
         return response_head(req, path, res, _cfg, route);
 
@@ -131,8 +130,8 @@ HttpResponse    list_dir_res(const HttpRequest& req, std::string path, HttpRespo
         res.body().append(line_buff);
     }
 
-    res.status(200);
-    res.headers("Content-Type", "text/html");
+    res.set_status(200);
+    res.set_header("Content-Type", "text/html");
     file.close();
 
     return res;
@@ -160,9 +159,8 @@ HttpResponse    response_get(const HttpRequest& req, std::string path, HttpRespo
     std::ostringstream  ss;
 
     ss << res.body().length();
-    res.status(200);
-
-    res.headers("Content-Type", ServerConfig::getMimeType(path));
+    res.set_status(200);
+    res.set_header("Content-Type", ServerConfig::getMimeType(path));
 
     return res;
 }
@@ -171,13 +169,13 @@ HttpResponse    response_head(const HttpRequest& req, std::string path, HttpResp
 {
     switch (index_path(req, route, path)) {
         case VALIDPATH:
-            res.status(200);
-            res.headers("Content-type", ServerConfig::getMimeType(path));
+            res.set_status(200);
+            res.set_header("Content-type", ServerConfig::getMimeType(path));
             return res;
 
         case AUTOINDEX:
-            res.status(200);
-            res.headers("Content-type", ServerConfig::getMimeType(DIRLISTING));
+            res.set_status(200);
+            res.set_header("Content-type", ServerConfig::getMimeType(DIRLISTING));
             return res;
 
         case INVALIDPATH:
@@ -204,16 +202,16 @@ HttpResponse    response_error(const HttpRequest& req, HttpResponse& res, Server
             std::ostringstream  ss;
             ss << res.body().length();
 
-            res.status(200);
-            res.headers("Content-Type", ServerConfig::getMimeType(path));
+            res.set_status(200);
+            res.set_header("Content-Type", ServerConfig::getMimeType(path));
         }
         else if (statusCode == 500)
-            res.status(500);
+            res.set_status(500);
         else
             return response_error(req, res, _cfg, route, 500);
     }
     else
-        res.status(statusCode);
+        res.set_status(statusCode);
 
     return res;
 }

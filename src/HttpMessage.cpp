@@ -37,7 +37,12 @@ std::string HttpMessage::version_string() const
     return result.str();
 }
 
-const HttpMessage::headers_t& HttpMessage::headers() const { return _headers; }
+HttpMessage::headers_t& HttpMessage::headers() { return _headers; }
+
+std::string& HttpMessage::headers(std::string& field_name)
+{
+    return _headers.at(field_name);
+}
 
 const std::string& HttpMessage::headers(const std::string& field_name) const
 {

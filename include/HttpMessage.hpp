@@ -41,7 +41,8 @@ public:
     std::string version_string() const; // Returns version string (for example: "HTTP/1.1")
 
 //    const std::string& header(const std::string& field_name) const;
-    const headers_t& headers() const;
+    headers_t& headers();
+    std::string& headers(std::string& field);
     const std::string& headers(const std::string& field) const;
     HttpMessage::headers_t::const_iterator headers(const std::string& field, const std::string& value);
     void removeHeader(const std::string& field);

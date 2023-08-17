@@ -2,20 +2,10 @@
 #include <sstream>
 
 
-// BEGIN: Helper Functions
-std::map<short, std::string>    createStatusCodeMap() {
-    std::map<short, std::string>    map;
+// BEGIN: Helper Functions Prototypes
+std::map<short, std::string>    createStatusCodeMap();
+// END: Helper Functions Prototypes
 
-    map.insert(std::make_pair(200, "OK"));
-    map.insert(std::make_pair(400, "Bad request"));
-    map.insert(std::make_pair(403, "Forbidden"));
-    map.insert(std::make_pair(404, "File Not Found"));
-    map.insert(std::make_pair(405, "Method Not Allowed"));
-    map.insert(std::make_pair(500, "Internal Server Error"));
-
-    return map;
-}
-// END: Helper functions
 
 // BEGIN: Variables
 const std::map<short, std::string>  HttpResponse::_status_code_map = createStatusCodeMap();
@@ -42,16 +32,6 @@ HttpResponse&       HttpResponse::operator=(const HttpResponse& copy)
 }
 // END: Canonical Form Functions
 
-HttpResponse& HttpResponse::status(int code ) { _status_code = code; return *this; }
-HttpResponse& HttpResponse::status(int code, const std::string& message)
-{
-    _status_code = code;
-    _status_message = message;
-    return *this;
-}
-
-int HttpResponse::status() const { return _status_code; }
-const std::string& HttpResponse::statusMessage() const { return _status_message; }
 
 // BEGIN: Class Functions
 std::string         HttpResponse::toStringStart() const
@@ -69,6 +49,71 @@ std::string         HttpResponse::toStringStart() const
     return result.str();
 }
 
+HttpResponse&       HttpResponse::set_version(int major, int minor)
+{
+    this->_major_version = major;
+    this->_minor_version = minor;
+
+    return *this;
+}
+
+HttpResponse&       HttpResponse::set_header(const std::string& name, const std::string& value)
+{
+    this->add_header(name, value);
+
+    return *this;
+}
+
+std::string&        HttpResponse::get_header(std::string& name)
+{
+    return this->headers(name);
+}
+
+HttpResponse&       HttpResponse::remove_header(const std::string& name)
+{
+    this->headers().erase(name);
+
+    return *this;
+}
+
+HttpResponse&       HttpResponse::set_status(int code)
+{
+    std::map<short, std::string>::const_iterator    it = _status_code_map.find(code);
+
+    _status_code = code;
+    _status_message = (it != HttpResponse::_status_code_map.end()) ? it->second : "Undefined";
+
+    return *this;
+}
+
+HttpResponse&       HttpResponse::set_status(int code, const std::string& message)
+{
+    _status_code = code;
+    _status_message = message;
+
+    return *this;
+}
+
+std::string&        HttpResponse::body()
+{
+    return this->_body;
+}
+
+const std::string&  HttpResponse::body() const
+{
+    return this->_body;
+}
+
+int                 HttpResponse::get_status() const
+{
+    return _status_code;
+}
+
+const std::string&  HttpResponse::get_status_message() const
+{
+    return _status_message;
+}
+
 std::string         HttpResponse::toString()
 {
     std::stringstream   cl;
@@ -81,3 +126,19 @@ std::string         HttpResponse::toString()
     return result.str();
 }
 // END: Class Functions
+
+
+// BEGIN: Helper Functions
+std::map<short, std::string>    createStatusCodeMap() {
+    std::map<short, std::string>    map;
+
+    map.insert(std::make_pair(200, "OK"));
+    map.insert(std::make_pair(400, "Bad request"));
+    map.insert(std::make_pair(403, "Forbidden"));
+    map.insert(std::make_pair(404, "File Not Found"));
+    map.insert(std::make_pair(405, "Method Not Allowed"));
+    map.insert(std::make_pair(500, "Internal Server Error"));
+
+    return map;
+}
+// END: Helper Functions
